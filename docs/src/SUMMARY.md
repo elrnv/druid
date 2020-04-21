@@ -9,5 +9,6 @@
 - [Localization (TODO)](./localization.md)
 - [Command (TODO)](./command.md)
 - [Widgets in depth (TODO)](./custom_widgets.md)
+- [Examples](./examples.md)
 ---
 - [More information](./more_information.md)
