@@ -28,12 +28,12 @@ jobs:
       run: cargo install wasm-pack
 
     - name: Install stable toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          target: wasm32-unknown-unknown
-          profile: minimal
-          override: true
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        target: wasm32-unknown-unknown
+        profile: minimal
+        override: true
 
     - name: Build WASM examples
       run: wasm-pack build --target web druid/examples/wasm
