@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div id="sidebar-scrollbox" class="sidebar-scrollbox">
-                <ol class="chapter"><li class="expanded "><a href="intro.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li class="expanded "><a href="setup.html"><strong aria-hidden="true">2.</strong> Set up Druid</a></li><li class="expanded "><a href="get_started.html" class="active"><strong aria-hidden="true">3.</strong> Get started with Druid</a></li><li class="expanded "><a href="data.html"><strong aria-hidden="true">4.</strong> Data trait</a></li><li class="expanded "><a href="widget.html"><strong aria-hidden="true">5.</strong> Widget trait</a></li><li class="expanded "><a href="lens.html"><strong aria-hidden="true">6.</strong> Lens trait</a></li><li class="expanded "><a href="env.html"><strong aria-hidden="true">7.</strong> Env (TODO)</a></li><li class="expanded "><a href="localization.html"><strong aria-hidden="true">8.</strong> Localization (TODO)</a></li><li class="expanded "><a href="command.html"><strong aria-hidden="true">9.</strong> Command (TODO)</a></li><li class="expanded "><a href="custom_widgets.html"><strong aria-hidden="true">10.</strong> Widgets in depth (TODO)</a></li><li class="spacer"></li><li class="expanded "><a href="more_information.html"><strong aria-hidden="true">11.</strong> More information</a></li></ol>
+                <ol class="chapter"><li class="expanded "><a href="intro.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li class="expanded "><a href="setup.html"><strong aria-hidden="true">2.</strong> Set up Druid</a></li><li class="expanded "><a href="get_started.html" class="active"><strong aria-hidden="true">3.</strong> Get started with Druid</a></li><li class="expanded "><a href="data.html"><strong aria-hidden="true">4.</strong> Data trait</a></li><li class="expanded "><a href="widget.html"><strong aria-hidden="true">5.</strong> Widget trait</a></li><li class="expanded "><a href="lens.html"><strong aria-hidden="true">6.</strong> Lens trait</a></li><li class="expanded "><a href="env.html"><strong aria-hidden="true">7.</strong> Env</a></li><li class="expanded "><a href="localization.html"><strong aria-hidden="true">8.</strong> Localization (TODO)</a></li><li class="expanded "><a href="command.html"><strong aria-hidden="true">9.</strong> Command (TODO)</a></li><li class="expanded "><a href="custom_widgets.html"><strong aria-hidden="true">10.</strong> Widgets in depth (TODO)</a></li><li class="expanded "><a href="example_demos.html"><strong aria-hidden="true">11.</strong> Example Demos</a></li><li class="spacer"></li><li class="expanded "><a href="more_information.html"><strong aria-hidden="true">12.</strong> More information</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -158,18 +158,17 @@ app built and running</em>.</p>
 </code></pre>
 <p>And then adding druid as a dependency to Cargo.toml</p>
 <pre><code class="language-toml">[dependencies]
-druid = &quot;0.4.0&quot;
+druid = &quot;0.5.0&quot;
 </code></pre>
 <p>To show a minimal window with a label replace <code>main.rs</code> with this;</p>
-<pre><code class="language-rust noplaypen">use druid::{AppLauncher, WindowDesc, Widget};
+<pre><code class="language-rust noplaypen">use druid::{AppLauncher, WindowDesc, Widget, PlatformError};
 use druid::widget::Label;
-use druid::shell::Error;
 
 fn build_ui() -&gt; impl Widget&lt;()&gt; {
     Label::new(&quot;Hello world&quot;)
 }
 
-fn main() -&gt; Result&lt;(), Error&gt; {
+fn main() -&gt; Result&lt;(), PlatformError&gt; {
     AppLauncher::with_window(WindowDesc::new(build_ui)).launch(())?;
     Ok(())
 }
@@ -182,15 +181,15 @@ We solve both these problems by passing in a widget-tree with one single widget 
 <p>To see how this works we will divide our window in four. We'll have two rows and two columns with a single label in each of the quadrants. We can lay-out our labels using the <code>Flex</code> widget.</p>
 <pre><code class="language-rust noplaypen">fn build_ui() -&gt; impl Widget&lt;()&gt; {
     Flex::row()
-        .with_child(
+        .with_flex_child(
             Flex::column()
-                .with_child(Label::new(&quot;top left&quot;), 1.0)
-                .with_child(Label::new(&quot;bottom left&quot;), 1.0),
+                .with_flex_child(Label::new(&quot;top left&quot;), 1.0)
+                .with_flex_child(Label::new(&quot;bottom left&quot;), 1.0),
             1.0)
-        .with_child(
+        .with_flex_child(
             Flex::column()
-                .with_child(Label::new(&quot;top right&quot;), 1.0)
-                .with_child(Label::new(&quot;bottom right&quot;), 1.0),
+                .with_flex_child(Label::new(&quot;top right&quot;), 1.0)
+                .with_flex_child(Label::new(&quot;bottom right&quot;), 1.0),
             1.0)
 }
 </code></pre>
@@ -200,15 +199,15 @@ We solve both these problems by passing in a widget-tree with one single widget 
     Padding::new(
         10.0,
         Flex::row()
-            .with_child(
+            .with_flex_child(
                 Flex::column()
-                    .with_child(Label::new(&quot;top left&quot;), 1.0)
-                    .with_child(Align::centered(Label::new(&quot;bottom left&quot;)), 1.0),
+                    .with_flex_child(Label::new(&quot;top left&quot;), 1.0)
+                    .with_flex_child(Align::centered(Label::new(&quot;bottom left&quot;)), 1.0),
                 1.0)
             .with_child(
                 Flex::column()
-                    .with_child(Label::new(&quot;top right&quot;), 1.0)
-                    .with_child(Align::centered(Label::new(&quot;bottom right&quot;)), 1.0),
+                    .with_flex_child(Label::new(&quot;top right&quot;), 1.0)
+                    .with_flex_child(Align::centered(Label::new(&quot;bottom right&quot;)), 1.0),
                 1.0))
 }
 </code></pre>

@@ -83,7 +83,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div id="sidebar-scrollbox" class="sidebar-scrollbox">
-                <ol class="chapter"><li class="expanded "><a href="intro.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li class="expanded "><a href="setup.html"><strong aria-hidden="true">2.</strong> Set up Druid</a></li><li class="expanded "><a href="get_started.html"><strong aria-hidden="true">3.</strong> Get started with Druid</a></li><li class="expanded "><a href="data.html"><strong aria-hidden="true">4.</strong> Data trait</a></li><li class="expanded "><a href="widget.html"><strong aria-hidden="true">5.</strong> Widget trait</a></li><li class="expanded "><a href="lens.html"><strong aria-hidden="true">6.</strong> Lens trait</a></li><li class="expanded "><a href="env.html"><strong aria-hidden="true">7.</strong> Env (TODO)</a></li><li class="expanded "><a href="localization.html"><strong aria-hidden="true">8.</strong> Localization (TODO)</a></li><li class="expanded "><a href="command.html"><strong aria-hidden="true">9.</strong> Command (TODO)</a></li><li class="expanded "><a href="custom_widgets.html"><strong aria-hidden="true">10.</strong> Widgets in depth (TODO)</a></li><li class="spacer"></li><li class="expanded "><a href="more_information.html"><strong aria-hidden="true">11.</strong> More information</a></li></ol>
+                <ol class="chapter"><li class="expanded "><a href="intro.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li class="expanded "><a href="setup.html"><strong aria-hidden="true">2.</strong> Set up Druid</a></li><li class="expanded "><a href="get_started.html"><strong aria-hidden="true">3.</strong> Get started with Druid</a></li><li class="expanded "><a href="data.html"><strong aria-hidden="true">4.</strong> Data trait</a></li><li class="expanded "><a href="widget.html"><strong aria-hidden="true">5.</strong> Widget trait</a></li><li class="expanded "><a href="lens.html"><strong aria-hidden="true">6.</strong> Lens trait</a></li><li class="expanded "><a href="env.html"><strong aria-hidden="true">7.</strong> Env</a></li><li class="expanded "><a href="localization.html"><strong aria-hidden="true">8.</strong> Localization (TODO)</a></li><li class="expanded "><a href="command.html"><strong aria-hidden="true">9.</strong> Command (TODO)</a></li><li class="expanded "><a href="custom_widgets.html"><strong aria-hidden="true">10.</strong> Widgets in depth (TODO)</a></li><li class="expanded "><a href="example_demos.html"><strong aria-hidden="true">11.</strong> Example Demos</a></li><li class="spacer"></li><li class="expanded "><a href="more_information.html"><strong aria-hidden="true">12.</strong> More information</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -213,18 +213,17 @@ app built and running</em>.</p>
 </code></pre>
 <p>And then adding druid as a dependency to Cargo.toml</p>
 <pre><code class="language-toml">[dependencies]
-druid = &quot;0.4.0&quot;
+druid = &quot;0.5.0&quot;
 </code></pre>
 <p>To show a minimal window with a label replace <code>main.rs</code> with this;</p>
-<pre><code class="language-rust noplaypen">use druid::{AppLauncher, WindowDesc, Widget};
+<pre><code class="language-rust noplaypen">use druid::{AppLauncher, WindowDesc, Widget, PlatformError};
 use druid::widget::Label;
-use druid::shell::Error;
 
 fn build_ui() -&gt; impl Widget&lt;()&gt; {
     Label::new(&quot;Hello world&quot;)
 }
 
-fn main() -&gt; Result&lt;(), Error&gt; {
+fn main() -&gt; Result&lt;(), PlatformError&gt; {
     AppLauncher::with_window(WindowDesc::new(build_ui)).launch(())?;
     Ok(())
 }
@@ -237,15 +236,15 @@ We solve both these problems by passing in a widget-tree with one single widget 
 <p>To see how this works we will divide our window in four. We'll have two rows and two columns with a single label in each of the quadrants. We can lay-out our labels using the <code>Flex</code> widget.</p>
 <pre><code class="language-rust noplaypen">fn build_ui() -&gt; impl Widget&lt;()&gt; {
     Flex::row()
-        .with_child(
+        .with_flex_child(
             Flex::column()
-                .with_child(Label::new(&quot;top left&quot;), 1.0)
-                .with_child(Label::new(&quot;bottom left&quot;), 1.0),
+                .with_flex_child(Label::new(&quot;top left&quot;), 1.0)
+                .with_flex_child(Label::new(&quot;bottom left&quot;), 1.0),
             1.0)
-        .with_child(
+        .with_flex_child(
             Flex::column()
-                .with_child(Label::new(&quot;top right&quot;), 1.0)
-                .with_child(Label::new(&quot;bottom right&quot;), 1.0),
+                .with_flex_child(Label::new(&quot;top right&quot;), 1.0)
+                .with_flex_child(Label::new(&quot;bottom right&quot;), 1.0),
             1.0)
 }
 </code></pre>
@@ -255,15 +254,15 @@ We solve both these problems by passing in a widget-tree with one single widget 
     Padding::new(
         10.0,
         Flex::row()
-            .with_child(
+            .with_flex_child(
                 Flex::column()
-                    .with_child(Label::new(&quot;top left&quot;), 1.0)
-                    .with_child(Align::centered(Label::new(&quot;bottom left&quot;)), 1.0),
+                    .with_flex_child(Label::new(&quot;top left&quot;), 1.0)
+                    .with_flex_child(Align::centered(Label::new(&quot;bottom left&quot;)), 1.0),
                 1.0)
             .with_child(
                 Flex::column()
-                    .with_child(Label::new(&quot;top right&quot;), 1.0)
-                    .with_child(Align::centered(Label::new(&quot;bottom right&quot;)), 1.0),
+                    .with_flex_child(Label::new(&quot;top right&quot;), 1.0)
+                    .with_flex_child(Align::centered(Label::new(&quot;bottom right&quot;)), 1.0),
                 1.0))
 }
 </code></pre>
@@ -330,7 +329,7 @@ struct TodoItem {
     due_date: Option&lt;Arc&lt;DateTime&gt;&gt;,
     // you can specify a custom comparison fn
     // (anything with the signature (&amp;T, &amp;T) -&gt; bool)
-    #[druid(same_fn = &quot;PartialEq::eq&quot;)]
+    #[data(same_fn = &quot;PartialEq::eq&quot;)]
     added_date: DateTime,
     title: String,
     note: Option&lt;String&gt;,
@@ -571,7 +570,7 @@ one of its fields, <code>derive</code> will fail. To get around this, you can sp
 custom name for a field's lens:</p>
 <pre><code class="language-rust noplaypen">#[derive(Lens)]
 struct Item {
-    #[druid(lens_name = &quot;count_lens&quot;)]
+    #[lens(name = &quot;count_lens&quot;)]
     count: usize,
 }
 
@@ -687,19 +686,232 @@ impl Lens&lt;f64, f64&gt; for MilesToKm {
     }
 }
 </code></pre>
-<h1><a class="header" href="#lenses" id="lenses">Lenses</a></h1>
+<h1><a class="header" href="#the-env" id="the-env">The <code>Env</code></a></h1>
+<p>The <a href="https://docs.rs/druid/0.5.0/druid/struct.Env.html"><code>Env</code></a> represents the environment; it is intended as a way of managing
+and accessing state about your specific application, such as color schemes,
+localized strings, and other resources.</p>
+<p>The <code>Env</code> is created when the application is launched, and is passed down to all
+widgets. The <code>Env</code> may be modified at various points in the tree; values in the
+environment can be overridden with other values of the same type, but they can
+never be removed. If something exists in the <code>Env</code> at a given level of the tree,
+it will exist for everything 'below' that level; that is, for all children of that
+widget.</p>
+<h2><a class="header" href="#keys-values-and-themes" id="keys-values-and-themes"><code>Key</code>s, <code>Value</code>s, and themes</a></h2>
+<p>The most prominent role of <code>Env</code> is to store a set of typed keys and values. The
+<code>Env</code> can only store a few types of things; these are represented by the
+<a href="https://docs.rs/druid/0.5.0/druid/struct.Value.html"><code>Value</code></a> type, which looks like this:</p>
+<pre><code class="language-rust noplaypen">pub enum Value {
+    Point(Point),
+    Size(Size),
+    Rect(Rect),
+    Color(Color),
+    Float(f64),
+    Bool(bool),
+    UnsignedInt(u64),
+    String(String),
+}
+</code></pre>
+<p>The only way to get an item out of the <code>Env</code> is with a <a href="https://docs.rs/druid/0.5.0/druid/struct.Key.html"><code>Key</code></a>. A <a href="https://docs.rs/druid/0.5.0/druid/struct.Key.html"><code>Key</code></a> is
+a combination of a string identifier and a type.</p>
+<p>You can think of this as strict types, enforced at runtime. This is less scary
+than it sounds, assuming the user follows a few simple guidelines. That said, <strong>It is the
+programmer's responsibility to ensure that the environment is used correctly</strong>.
+The API is aggressive about checking for misuse, and many methods will panic if
+anything is amiss. In practice this should be easy to avoid, by following a few
+simple guidelines.</p>
+<ol>
+<li>
+<p><strong><code>Key</code>s should be <code>const</code>s with unique names.</strong> If you need to use a custom
+key, you should declare it as a <code>const</code>, and give it a unique name. By
+convention, you should namespace your keys using something like <a href="https://en.wikipedia.org/wiki/Reverse_domain_name_notation">reverse-DNS</a>
+notation, or even just prefixing them with the name of your app.</p>
+<pre><code class="language-rust noplaypen">const BAD_NAME: Key&lt;f64&gt; = Key::new(&quot;height&quot;);
+const GOOD_NAME: Key&lt;f64&gt; = Key::new(&quot;com.example.my-app.main-view-height&quot;);
+</code></pre>
+</li>
+<li>
+<p><strong><code>Key</code>s must always be set before they are used.</strong> In practice this means
+that most keys are set when your application launches, using
+<a href="https://docs.rs/druid/0.5.0/druid/struct.AppLauncher.html#method.configure_env"><code>AppLauncher::configure_env</code></a>. Once a key has been added to the <code>Env</code>, it
+cannot be deleted, although it can be overwritten.</p>
+</li>
+<li>
+<p><strong>Values can only be overwritten by values of the same type.</strong> If you have a
+<code>Key&lt;f64&gt;</code>, assuming that key has already been added to the <code>Env</code>, you cannot
+replace it with any other type.</p>
+</li>
+</ol>
+<p>Assuming these rules are followed, <code>Env</code> should just work.</p>
+<h3><a class="header" href="#keyorvalue" id="keyorvalue">KeyOrValue</a></h3>
+<p>Druid includes a <a href="https://docs.rs/druid/0.5.0/druid/enum.KeyOrValue.html"><code>KeyOrValue</code></a> type that is used for setting certain properties
+of widgets. This is a type that can be <em>either</em> a concrete instance of some
+type, <em>or</em> a <code>Key</code> that can be used to get that type from the <code>Env</code>.</p>
+<pre><code class="language-rust noplaypen">const IMPORTANT_LABEL_COLOR: Key&lt;Color&gt; = Key::new(&quot;my-app.important-label-color&quot;);
+const RED: Color = Color::rgb8(0xFF, 0, 0);
+
+fn make_labels() {
+    let with_value = Label::&lt;()&gt;::new(&quot;Warning!&quot;).with_text_color(RED);
+    let with_key = Label::&lt;()&gt;::new(&quot;Warning!&quot;).with_text_color(IMPORTANT_LABEL_COLOR);
+}
+</code></pre>
+<h3><a class="header" href="#envscope" id="envscope">EnvScope</a></h3>
+<p>You may override values in the environment for a given widget (and all of its
+children) by using the <a href="https://docs.rs/druid/0.5.0/druid/widget/struct.EnvScope.html"><code>EnvScope</code></a> widget. This is easiest when combined with
+the <a href="https://docs.rs/druid/0.5.0/druid/trait.WidgetExt.html#method.env_scope"><code>env_scope</code></a> method on <a href="https://docs.rs/druid/0.5.0/druid/trait.WidgetExt.html"><code>WidgetExt</code></a>:</p>
+<pre><code class="language-rust noplaypen">fn scoped_label() {
+    let my_label = Label::&lt;()&gt;::new(&quot;Warning!&quot;).env_scope(|env, _| {
+        env.set(druid::theme::LABEL_COLOR, Color::BLACK);
+        env.set(druid::theme::TEXT_SIZE_NORMAL, 18.0);
+    });
+}
+</code></pre>
+<h2><a class="header" href="#localization" id="localization">Localization</a></h2>
+<p><em>localization is currently half-baked</em></p>
+<p>The <code>Env</code> contains the localization resources for the current locale. A
+<a href="https://docs.rs/druid/0.5.0/druid/struct.LocalizedString.html"><code>LocalizedString</code></a> can be resolved to a given string in the current locale by
+calling its <a href="https://docs.rs/druid/0.5.0/druid/struct.LocalizedString.html#method.resolve"><code>resolve</code></a> method.</p>
+<p>In general, you should not need to worry about localization directly. See the
+<a href="./localization.html">localization</a> chapter for an overview of localization in druid.</p>
 <h1><a class="header" href="#localization-todo" id="localization-todo">Localization (TODO)</a></h1>
 <h1><a class="header" href="#command-todo" id="command-todo">Command (TODO)</a></h1>
 <h1><a class="header" href="#create-custom-widgets" id="create-custom-widgets">Create custom widgets</a></h1>
-<pre><code>- controller, painter
-- how to do layout
-- container widgets
-- widgetpod &amp; architecture
-- commands and widgetid
-- focus / active / hot
-- request paint &amp; request layout
-- changing widgets at runtime
+<p>The <code>Widget</code> trait is the heart of druid, and in any serious application you
+will eventually need to create and use custom <code>Widget</code>s.</p>
+<h2><a class="header" href="#painter-and-controller" id="painter-and-controller"><code>Painter</code> and <code>Controller</code></a></h2>
+<p>There are two helper widgets in druid that let you customize widget behaviour
+without needing to implement the full widget trait: <a href="https://docs.rs/druid/0.5.0/druid/widget/struct.Painter.html"><code>Painter</code></a> and
+<a href="https://docs.rs/druid/0.5.0/druid/widget/trait.Controller.html"><code>Controller</code></a>.</p>
+<h3><a class="header" href="#painter" id="painter">Painter</a></h3>
+<p>The <a href="https://docs.rs/druid/0.5.0/druid/widget/struct.Painter.html"><code>Painter</code></a> widget lets you draw arbitrary custom content, but cannot
+respond to events or otherwise contain update logic. Its general use is to
+either provide a custom background to some other widget, or to implement
+something like an icon or another graphical element that will be contained in
+some other widget.</p>
+<p>For instance, if we had some color data and we wanted to display it as a swatch
+with rounded corners, we could use a <code>Painter</code>:</p>
+<pre><code class="language-rust noplaypen">fn make_color_swatch() -&gt; Painter&lt;Color&gt; {
+    Painter::new(|ctx: &amp;mut PaintCtx, data: &amp;Color, env: &amp;Env| {
+        let bounds = ctx.size().to_rect();
+        let rounded = bounds.to_rounded_rect(CORNER_RADIUS);
+        ctx.fill(rounded, data);
+        ctx.stroke(rounded, &amp;env.get(druid::theme::PRIMARY_DARK), STROKE_WIDTH);
+    })
+}
 </code></pre>
+<p><code>Painter</code> uses all the space that is available to it; if you want to give it a
+set size, you must pass it explicit contraints, such as by wrapping it in a
+<a href="https://docs.rs/druid/0.5.0/druid/widget/struct.SizedBox.html"><code>SizedBox</code></a>:</p>
+<pre><code class="language-rust noplaypen">fn sized_swatch() -&gt; impl Widget&lt;Color&gt; {
+    SizedBox::new(make_color_swatch()).width(20.0).height(20.0)
+}
+</code></pre>
+<p>One other useful thing about <code>Painter</code> is that it can be used as the background
+of a <a href="https://docs.rs/druid/0.5.0/druid/widget/struct.Container.html"><code>Container</code></a> widget. If we wanted to have a label that used our swatch
+as a background, we could do:</p>
+<pre><code class="language-rust noplaypen">fn background_label() -&gt; impl Widget&lt;Color&gt; {
+    Label::dynamic(|color: &amp;Color, _| {
+        let (r, g, b, _) = color.as_rgba_u8();
+        format!(&quot;#{:X}{:X}{:X}&quot;, r, g, b)
+    })
+    .background(make_color_swatch())
+}
+</code></pre>
+<p>(This uses the <a href="https://docs.rs/druid/0.5.0/druid/trait.WidgetExt.html#background"><code>background</code></a> method on <a href="https://docs.rs/druid/0.5.0/druid/trait.WidgetExt.html"><code>WidgetExt</code></a> to embed our label in a
+container.)</p>
+<h3><a class="header" href="#controller" id="controller">Controller</a></h3>
+<p>The <a href="https://docs.rs/druid/0.5.0/druid/widget/trait.Controller.html"><code>Controller</code></a> trait is sort of the inverse of <code>Painter</code>; it is a way to
+make widgets that handle events, but don't do any layout or drawing. The idea
+here is that you can use some <code>Controller</code> type to customize the behaviour of
+some set of children.</p>
+<p>The <a href="https://docs.rs/druid/0.5.0/druid/widget/trait.Controller.html"><code>Controller</code></a> trait has <code>event</code>, <code>update</code>, and <code>lifecycle</code> methods, just
+like <a href="./widget.html"><code>Widget</code></a>; it does not have <code>paint</code> or <code>layout</code> methods. Also unlike
+<a href="./widget.html"><code>Widget</code></a>, all of its methods are optional; you can override only the method
+that you need.</p>
+<p>There's one other difference to the <code>Controller</code> methods; it is explicitly
+passed a mutable reference to its child in each method, so that it can modify it
+or forward events as needed.</p>
+<p>As an arbitrary example, here is how you might use a <code>Controller</code> to make a
+textbox fire some action (say doing a search) 300ms after the last keypress:</p>
+<pre><code class="language-rust noplaypen">const ACTION: Selector = Selector::new(&quot;hello.textbox-action&quot;);
+const DELAY: Duration = Duration::from_millis(300);
+
+struct TextBoxActionController {
+    timer: Option&lt;TimerToken&gt;,
+}
+
+impl TextBoxActionController {
+    pub fn new() -&gt; Self {
+        TextBoxActionController { timer: None }
+    }
+}
+
+impl Controller&lt;String, TextBox&gt; for TextBoxActionController {
+    fn event(
+        &amp;mut self,
+        child: &amp;mut TextBox,
+        ctx: &amp;mut EventCtx,
+        event: &amp;Event,
+        data: &amp;mut String,
+        env: &amp;Env,
+    ) {
+        match event {
+            Event::KeyDown(k) if k.key_code == KeyCode::Return =&gt; {
+                ctx.submit_command(ACTION, None);
+            }
+            Event::KeyUp(k) if k.key_code != KeyCode::Return =&gt; {
+                self.timer = Some(ctx.request_timer(DELAY));
+                child.event(ctx, event, data, env);
+            }
+            Event::Timer(token) if Some(*token) == self.timer =&gt; {
+                ctx.submit_command(ACTION, None);
+            }
+            _ =&gt; child.event(ctx, event, data, env),
+        }
+    }
+}
+</code></pre>
+<h2><a class="header" href="#todo" id="todo">todo</a></h2>
+<p>v controller, painter</p>
+<ul>
+<li>how to do layout
+<ul>
+<li>how constraints work</li>
+<li>child widget, set_layout_rect</li>
+<li>paint bounds</li>
+</ul>
+</li>
+<li>container widgets</li>
+<li>widgetpod &amp; architecture</li>
+<li>commands and widgetid</li>
+<li>focus / active / hot</li>
+<li>request paint &amp; request layout</li>
+<li>changing widgets at runtime</li>
+</ul>
+<h1><a class="header" href="#examples" id="examples">Examples</a></h1>
+<h2><a class="header" href="#identity" id="identity">Identity</a></h2>
+<p><canvas id="canvas"></canvas></p>
+<script type="module">
+    import init, { identity } from '../pkg/druid_wasm_examples.js';
+
+    async function run() {
+        await init();
+        identity();
+    }
+
+    run();
+</script>
+<h2><a class="header" href="#flex" id="flex">Flex</a></h2>
+<p><canvas id="canvas"></canvas></p>
+<script type="module">
+    import init, { flex } from '../pkg/druid_wasm_examples.js';
+
+    async function run() {
+        await init();
+        flex();
+    }
+
+    run();
+</script>
 <h1><a class="header" href="#more-information" id="more-information">More information</a></h1>
 <p>If you want more information about Druid this document contains links more tutorials, blogposts and
 youtube videos.</p>
@@ -712,6 +924,7 @@ youtube videos.</p>
 </ul>
 <h2><a class="header" href="#projects-using-druid" id="projects-using-druid">Projects using Druid</a></h2>
 <ul>
+<li><a href="https://github.com/tbillington/kondo">Kondo</a> Save disk space by cleaning unneeded files from software projects.</li>
 <li><em>pull requests welcome</em></li>
 </ul>
 <h2><a class="header" href="#projects-that-work-with-druid-widgets-etc" id="projects-that-work-with-druid-widgets-etc">Projects that work with Druid (widgets etc)</a></h2>
