@@ -20,7 +20,7 @@ use druid::widget::{
     SizedBox, Slider, Stepper, Switch, TextBox, WidgetExt,
 };
 use druid::{
-    AppLauncher, Color, Data, Lens, LensExt, LocalizedString, PlatformError, WidgetId, WindowDesc,
+    AppLauncher, Color, Data, Lens, LensExt, LocalizedString, WidgetId, WindowDesc, PlatformError
 };
 
 const DEFAULT_SPACER_SIZE: f64 = 8.;
@@ -299,11 +299,12 @@ fn make_ui() -> impl Widget<AppState> {
         .padding(10.0)
 }
 
-pub fn main() -> Result<(), PlatformError> {
+pub fn launch(id: &str) -> Result<(), PlatformError> {
     let main_window = WindowDesc::new(make_ui)
         .window_size((620., 600.00))
         .with_min_size((620., 265.00))
-        .title(LocalizedString::new("Flex Container Options"));
+        .title(LocalizedString::new("Flex Container Options"))
+        .canvas_id(id);
 
     let demo_state = DemoState {
         input_text: "hello".into(),
@@ -329,4 +330,9 @@ pub fn main() -> Result<(), PlatformError> {
         .use_simple_logger()
         .launch(data)?;
     Ok(())
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn main() -> Result<(), PlatformError> {
+    launch("")
 }

@@ -18,7 +18,7 @@ use druid::widget::prelude::*;
 use druid::widget::{Align, BackgroundBrush, Button, Flex, Label, Padding};
 use druid::{
     commands as sys_cmds, AppDelegate, AppLauncher, Color, Command, ContextMenu, Data, DelegateCtx,
-    LocalizedString, MenuDesc, MenuItem, Selector, Target, WindowDesc, WindowId,
+    LocalizedString, MenuDesc, MenuItem, Selector, Target, WindowDesc, WindowId, PlatformError,
 };
 
 use log::info;
@@ -35,18 +35,24 @@ struct State {
     glow_hot: bool,
 }
 
-pub fn main() {
-    #[cfg(not(target_arch = "wasm32"))]
+#[cfg(not(target_arch = "wasm32"))]
+fn main() {
     simple_logger::init().unwrap();
+    launch("").ok();
+}
+
+pub fn launch(canvas_id: &str) -> Result<(), PlatformError> {
     let main_window = WindowDesc::new(ui_builder)
         .menu(make_menu(&State::default()))
         .title(
             LocalizedString::new("multiwin-demo-window-title").with_placeholder("Many windows!"),
-        );
+        )
+        .canvas_id(canvas_id);
     AppLauncher::with_window(main_window)
         .delegate(Delegate)
         .launch(State::default())
         .expect("launch failed");
+    Ok(())
 }
 
 // this is just an experiment for how we might reduce boilerplate.

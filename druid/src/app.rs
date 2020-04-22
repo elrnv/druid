@@ -46,6 +46,7 @@ pub struct WindowDesc<T> {
     pub(crate) menu: Option<MenuDesc<T>>,
     pub(crate) resizable: bool,
     pub(crate) show_titlebar: bool,
+    pub(crate) canvas_id: Option<String>,
     /// The `WindowId` that will be assigned to this window.
     ///
     /// This can be used to track a window from when it is launched and when
@@ -154,6 +155,7 @@ impl<T: Data> WindowDesc<T> {
             menu: MenuDesc::platform_default(),
             resizable: true,
             show_titlebar: true,
+            canvas_id: None,
             id: WindowId::next(),
         }
     }
@@ -205,6 +207,15 @@ impl<T: Data> WindowDesc<T> {
         self
     }
 
+    /// Set the canvas id string of the target canvas in an HTML document.
+    ///
+    /// This only used when deploying to the web and ignored otherwise.
+    /// By default, the canvas with id "canvas" will be used.
+    pub fn canvas_id(mut self, id: &str) -> Self {
+        self.canvas_id = Some(id.to_string());
+        self
+    }
+
     /// Attempt to create a platform window from this `WindowDesc`.
     pub(crate) fn build_native(
         mut self,
@@ -234,6 +245,13 @@ impl<T: Data> WindowDesc<T> {
         builder.set_title(self.title.localized_str());
         if let Some(menu) = platform_menu {
             builder.set_menu(menu);
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        {
+            if let Some(canvas_id) = self.canvas_id {
+                builder.set_canvas_id(&canvas_id);
+            }
         }
 
         let root = self.root;

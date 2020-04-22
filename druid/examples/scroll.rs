@@ -19,15 +19,22 @@ use druid::kurbo::Circle;
 use druid::piet::RadialGradient;
 use druid::widget::prelude::*;
 use druid::widget::{Flex, Padding, Scroll};
-use druid::{AppLauncher, Data, Insets, LocalizedString, Rect, WindowDesc};
+use druid::{AppLauncher, Data, Insets, LocalizedString, Rect, WindowDesc, PlatformError};
 
-pub fn main() {
+#[cfg(not(target_arch = "wasm32"))]
+fn main() {
+    launch("").ok();
+}
+
+pub fn launch(canvas_id: &str) -> Result<(), PlatformError> {
     let window = WindowDesc::new(build_widget)
-        .title(LocalizedString::new("scroll-demo-window-title").with_placeholder("Scroll demo"));
+        .title(LocalizedString::new("scroll-demo-window-title").with_placeholder("Scroll demo"))
+        .canvas_id(canvas_id);
     AppLauncher::with_window(window)
         .use_simple_logger()
         .launch(0u32)
         .expect("launch failed");
+    Ok(())
 }
 
 fn build_widget() -> impl Widget<u32> {

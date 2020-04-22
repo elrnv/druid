@@ -11,7 +11,7 @@ publish = false
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-druid = { path="../.."}
+druid = { path="../.." }
 wasm-bindgen = "0.2.60"
 console_error_panic_hook = { version = "0.1.6" }
 log = "0.4.8"
@@ -19,3 +19,9 @@ instant = { version = "0.1", features = [ "wasm-bindgen" ] }
 
 [target.'cfg(not(target_arch="wasm32"))'.dependencies]
 simple_logger = { version = "1.6.0", default-features = false }
+
+# We have to immitate the features of druid since druid examples are included as a module and have
+# conditional compilation based on features.
+[features]
+default = ["image"]
+image = ["druid/image"]

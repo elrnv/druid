@@ -249,6 +249,15 @@ impl WindowBuilder {
         self.0.set_menu(menu.into_inner())
     }
 
+    /// Set the canvas identifier.
+    ///
+    /// This identifies the canvas HTML element to which the contents of the druid window should be
+    /// drawn.
+    #[cfg(target_arch = "wasm32")]
+    pub fn set_canvas_id(&mut self, id: &str) {
+        self.0.set_canvas_id(id)
+    }
+
     /// Attempt to construct the platform window.
     ///
     /// If this fails, your application should exit.

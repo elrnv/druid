@@ -15,7 +15,7 @@
 //! This example demonstrates the `ViewSwitcher` widget
 
 use druid::widget::{Button, Flex, Label, Split, TextBox, ViewSwitcher};
-use druid::{AppLauncher, Data, Env, Lens, LocalizedString, Widget, WidgetExt, WindowDesc};
+use druid::{AppLauncher, Data, Env, Lens, LocalizedString, Widget, WidgetExt, WindowDesc, PlatformError};
 
 #[derive(Clone, Data, Lens)]
 struct AppState {
@@ -23,8 +23,14 @@ struct AppState {
     current_text: String,
 }
 
-pub fn main() {
-    let main_window = WindowDesc::new(make_ui).title(LocalizedString::new("View Switcher"));
+#[cfg(not(target_arch = "wasm32"))]
+fn main() {
+    launch("").ok();
+}
+
+pub fn launch(canvas_id: &str) -> Result<(), PlatformError> {
+    let main_window = WindowDesc::new(make_ui).title(LocalizedString::new("View Switcher"))
+        .canvas_id(canvas_id);
     let data = AppState {
         current_view: 0,
         current_text: "Edit me!".to_string(),
@@ -33,6 +39,7 @@ pub fn main() {
         .use_simple_logger()
         .launch(data)
         .expect("launch failed");
+    Ok(())
 }
 
 fn make_ui() -> impl Widget<AppState> {

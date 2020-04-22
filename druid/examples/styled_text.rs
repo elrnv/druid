@@ -28,10 +28,16 @@ struct AppData {
     text: String,
     size: f64,
 }
+
+#[cfg(not(target_arch = "wasm32"))]
 pub fn main() -> Result<(), PlatformError> {
+    launch("")
+}
+
+pub fn launch(canvas_id: &str) -> Result<(), PlatformError> {
     let main_window = WindowDesc::new(ui_builder).title(
         LocalizedString::new("styled-text-demo-window-title").with_placeholder("Type Styler"),
-    );
+    ).canvas_id(canvas_id);
     let data = AppData {
         text: "Here's some sample text".to_string(),
         size: 24.0,

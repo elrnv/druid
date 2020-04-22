@@ -14,48 +14,17 @@
 
 use wasm_bindgen::prelude::*;
 
+macro_rules! impl_example {
+    ($fn:ident) => {
+        #[wasm_bindgen]
+        pub fn $fn(canvas_id: &str) {
+            std::panic::set_hook(Box::new(console_error_panic_hook::hook));
+            examples::$fn::launch(canvas_id).unwrap();
+        }
+    };
+}
+
 // This line includes an automatically generated (in build.rs) examples module.
 // This particular mechanism is chosen to avoid any kinds of modifications to committed files at
 // build time, keeping the source tree clean from build artifacts.
 include!("examples.in");
-
-macro_rules! impl_example {
-    ($wasm_fn:ident, $expr:expr) => {
-        #[wasm_bindgen]
-        pub fn $wasm_fn() {
-            std::panic::set_hook(Box::new(console_error_panic_hook::hook));
-            $expr;
-        }
-    };
-    ($fn:ident) => {
-        impl_example!($fn, examples::$fn::main());
-    };
-    ($fn:ident.unwrap()) => {
-        impl_example!($fn, examples::$fn::main().unwrap());
-    };
-}
-
-impl_example!(anim);
-impl_example!(calc);
-impl_example!(custom_widget);
-impl_example!(either);
-//impl_example!(ext_event); // No thread support on wasm
-impl_example!(flex.unwrap());
-impl_example!(game_of_life);
-impl_example!(hello);
-impl_example!(identity);
-impl_example!(image);
-impl_example!(layout);
-impl_example!(lens);
-impl_example!(list);
-impl_example!(multiwin);
-impl_example!(panels.unwrap());
-impl_example!(parse);
-impl_example!(scroll_colors);
-impl_example!(scroll);
-impl_example!(split_demo);
-impl_example!(styled_text.unwrap());
-//impl_example!(svg); // usvg doesn't compile on usvg at the time of this writing
-impl_example!(switch_demo, examples::switch::main());
-impl_example!(timer);
-impl_example!(view_switcher);

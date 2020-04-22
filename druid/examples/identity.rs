@@ -35,7 +35,7 @@ use druid::widget::{Button, CrossAxisAlignment, Flex, WidgetId};
 use druid::{
     AppLauncher, BoxConstraints, Color, Command, Data, Env, Event, EventCtx, LayoutCtx, Lens,
     LifeCycle, LifeCycleCtx, LocalizedString, PaintCtx, Rect, RenderContext, Selector, Size,
-    TimerToken, UpdateCtx, Widget, WidgetExt, WindowDesc,
+    TimerToken, UpdateCtx, Widget, WidgetExt, WindowDesc, PlatformError
 };
 
 const CYCLE_DURATION: Duration = Duration::from_millis(100);
@@ -148,16 +148,23 @@ impl Widget<OurData> for ColorWell {
     }
 }
 
-pub fn main() {
+pub fn launch(canvas_id: &str) -> Result<(), PlatformError> {
     let window = WindowDesc::new(make_ui).title(
         LocalizedString::new("identity-demo-window-title").with_placeholder("Color Freezing Fun"),
-    );
+    ).canvas_id(canvas_id);
+
     AppLauncher::with_window(window)
         .use_simple_logger()
         .launch(OurData {
             color: Color::BLACK,
         })
         .expect("launch failed");
+    Ok(())
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn main() {
+    launch("").ok();
 }
 
 /// A constant `WidgetId`. This may be passed around and can be reused when

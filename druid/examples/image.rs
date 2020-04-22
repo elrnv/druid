@@ -18,14 +18,17 @@
 //! `cargo run --example image --features "images"`
 //!
 
+use druid::PlatformError;
+
 #[cfg(not(feature = "image"))]
-pub fn main() {
+pub fn launch(_: &str) -> Result<(), PlatformError> {
     eprintln!("This examples requires the \"image\" feature to be enabled:");
     eprintln!("cargo run --example image --features \"image\"");
+    Ok(())
 }
 
 #[cfg(feature = "image")]
-pub fn main() {
+pub fn launch(canvas_id: &str) -> Result<(), PlatformError> {
     use druid::{
         widget::{FillStrat, Flex, Image, ImageData, WidgetExt},
         AppLauncher, Color, Widget, WindowDesc,
@@ -57,10 +60,16 @@ pub fn main() {
         col
     };
 
-    let main_window = WindowDesc::new(ui_builder);
+    let main_window = WindowDesc::new(ui_builder).canvas_id(canvas_id);
     let data = 0_u32;
     AppLauncher::with_window(main_window)
         .use_simple_logger()
         .launch(data)
         .expect("launch failed");
+    Ok(())
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn main() {
+    launch("").ok();
 }

@@ -91,9 +91,15 @@ fn build_app() -> impl Widget<()> {
         )
 }
 
-pub fn main() -> Result<(), PlatformError> {
+#[cfg(not(target_arch = "wasm32"))]
+fn main() -> Result<(), PlatformError> {
+    launch("")
+}
+
+pub fn launch(canvas_id: &str) -> Result<(), PlatformError> {
     let main_window = WindowDesc::new(build_app)
-        .title(LocalizedString::new("panels-demo-window-title").with_placeholder("Fancy Boxes!"));
+        .title(LocalizedString::new("panels-demo-window-title").with_placeholder("Fancy Boxes!"))
+        .canvas_id(canvas_id);
     AppLauncher::with_window(main_window)
         .use_simple_logger()
         .launch(())?;

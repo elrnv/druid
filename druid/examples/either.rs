@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use druid::widget::{Checkbox, Either, Flex, Label, Slider};
-use druid::{AppLauncher, Data, Lens, LocalizedString, Widget, WidgetExt, WindowDesc};
+use druid::{AppLauncher, Data, Lens, LocalizedString, Widget, WidgetExt, WindowDesc, PlatformError};
 
 #[derive(Clone, Default, Data, Lens)]
 struct AppState {
@@ -21,17 +21,23 @@ struct AppState {
     value: f64,
 }
 
-pub fn main() {
+pub fn launch(canvas_id: &str) -> Result<(), PlatformError> {
     let main_window = WindowDesc::new(ui_builder).title(
         LocalizedString::new("either-demo-window-title")
             .with_placeholder("Switcheroo")
             .with_arg("view", |data: &AppState, _env| (data.which as u8).into()),
-    );
+    ).canvas_id(canvas_id);
     let data = AppState::default();
     AppLauncher::with_window(main_window)
         .use_simple_logger()
         .launch(data)
         .expect("launch failed");
+    Ok(())
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn main() {
+    launch("").ok();
 }
 
 fn ui_builder() -> impl Widget<AppState> {

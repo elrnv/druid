@@ -16,7 +16,7 @@
 
 use druid::{
     theme, AppLauncher, Color, Data, Lens, LocalizedString, RenderContext, Widget, WidgetExt,
-    WindowDesc,
+    WindowDesc, PlatformError,
 };
 
 use druid::widget::{CrossAxisAlignment, Flex, Label, Painter};
@@ -242,13 +242,14 @@ fn build_calc() -> impl Widget<CalcState> {
         )
 }
 
-pub fn main() {
+pub fn launch(canvas_id: &str) -> Result<(), PlatformError> {
     let window = WindowDesc::new(build_calc)
         .window_size((223., 300.))
         .resizable(false)
         .title(
             LocalizedString::new("calc-demo-window-title").with_placeholder("Simple Calculator"),
-        );
+        )
+        .canvas_id(canvas_id);
     let calc_state = CalcState {
         value: "0".to_string(),
         operand: 0.0,
@@ -259,4 +260,10 @@ pub fn main() {
         .use_simple_logger()
         .launch(calc_state)
         .expect("launch failed");
+    Ok(())
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn main() {
+    launch("").ok();
 }

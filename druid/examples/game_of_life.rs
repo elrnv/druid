@@ -23,7 +23,7 @@ use druid::widget::prelude::*;
 use druid::widget::{Button, Flex, Label, Slider};
 use druid::{
     AppLauncher, Color, Data, Lens, LocalizedString, MouseButton, Point, Rect, TimerToken,
-    WidgetExt, WindowDesc,
+    WidgetExt, WindowDesc, PlatformError,
 };
 use std::sync::Arc;
 
@@ -414,7 +414,12 @@ fn make_widget() -> impl Widget<AppData> {
         )
 }
 
-pub fn main() {
+#[cfg(not(target_arch = "wasm32"))]
+fn main() {
+    launch("").ok();
+}
+
+pub fn launch(id: &str) -> Result<(), PlatformError> {
     let window = WindowDesc::new(make_widget)
         .window_size(Size {
             width: 800.0,
@@ -424,7 +429,8 @@ pub fn main() {
         .title(
             LocalizedString::new("custom-widget-demo-window-title")
                 .with_placeholder("Game of Life"),
-        );
+        )
+        .canvas_id(id);
     let mut grid = Grid::new();
     let pattern0 = glider(GridPos { row: 5, col: 5 });
     for x in &pattern0 {
@@ -443,6 +449,7 @@ pub fn main() {
             speed: 0.5,
         })
         .expect("launch failed");
+    Ok(())
 }
 
 impl Index<GridPos> for ColorScheme {

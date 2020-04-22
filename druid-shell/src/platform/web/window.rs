@@ -64,6 +64,8 @@ pub struct WindowBuilder {
     title: String,
     cursor: Cursor,
     menu: Option<Menu>,
+    size: Option<Size>,
+    canvas_id: String,
 }
 
 #[derive(Clone, Default)]
@@ -132,11 +134,10 @@ impl WindowState {
     }
 
     /// Returns the window size in css units
-    fn get_window_size_and_dpr(&self) -> (f64, f64, f64) {
-        let w = &self.window;
-        let width = w.inner_width().unwrap().as_f64().unwrap();
-        let height = w.inner_height().unwrap().as_f64().unwrap();
-        let dpr = w.device_pixel_ratio();
+    fn get_canvas_size_and_dpr(&self) -> (f64, f64, f64) {
+        let width = self.canvas.offset_width() as f64;
+        let height = self.canvas.offset_height() as f64;
+        let dpr = self.window.device_pixel_ratio();
         (width, height, dpr)
     }
 }
@@ -213,9 +214,9 @@ fn setup_scroll_callback(ws: &Rc<WindowState>) {
 fn setup_resize_callback(ws: &Rc<WindowState>) {
     let state = ws.clone();
     register_window_event_listener(ws, "resize", move |_: web_sys::UiEvent| {
-        let (css_width, css_height, dpr) = state.get_window_size_and_dpr();
-        let physical_width = (dpr * css_width) as u32;
-        let physical_height = (dpr * css_height) as u32;
+        let (offset_width, offset_height, dpr) = state.get_canvas_size_and_dpr();
+        let physical_width = (dpr * offset_width) as u32;
+        let physical_height = (dpr * offset_height) as u32;
         state.dpr.replace(dpr);
         state.canvas.set_width(physical_width);
         state.canvas.set_height(physical_height);
@@ -302,6 +303,8 @@ impl WindowBuilder {
             title: String::new(),
             cursor: Cursor::Arrow,
             menu: None,
+            size: None,
+            canvas_id: String::from("canvas"),
         }
     }
 
@@ -310,8 +313,8 @@ impl WindowBuilder {
         self.handler = Some(handler);
     }
 
-    pub fn set_size(&mut self, _: Size) {
-        // Ignored
+    pub fn set_size(&mut self, size: Size) {
+        self.size = Some(size);
     }
 
     pub fn set_min_size(&mut self, _: Size) {
@@ -334,13 +337,17 @@ impl WindowBuilder {
         self.menu = Some(menu);
     }
 
+    pub fn set_canvas_id(&mut self, id: &str) {
+        self.canvas_id = id.to_string();
+    }
+
     pub fn build(self) -> Result<WindowHandle> {
         let window = web_sys::window().ok_or_else(|| Error::NoWindow)?;
         let canvas = window
             .document()
             .ok_or(Error::NoDocument)?
-            .get_element_by_id("canvas")
-            .ok_or_else(|| Error::NoElementById("canvas".to_string()))?
+            .get_element_by_id(&self.canvas_id)
+            .ok_or_else(|| Error::NoElementById(self.canvas_id.clone()))?
             .dyn_into::<web_sys::HtmlCanvasElement>()
             .map_err(|_| Error::JsCast)?;
         let context = canvas
@@ -350,13 +357,22 @@ impl WindowBuilder {
             .map_err(|_| Error::JsCast)?;
 
         let dpr = window.device_pixel_ratio();
-        let old_w = canvas.offset_width();
-        let old_h = canvas.offset_height();
-        let new_w = (old_w as f64 * dpr) as u32;
-        let new_h = (old_h as f64 * dpr) as u32;
+        let (offset_width, offset_height) = if let Some(size) = self.size {
+            log::warn!("Size set explicitly: {:?}", &size);
+            canvas.style().set_property("width", &format!("{}px", size.width))
+                .unwrap_or_else(|_| log::warn!("Failed to set canvas width"));
+            canvas.style().set_property("height", &format!("{}px", size.height))
+                .unwrap_or_else(|_| log::warn!("Failed to set canvas height"));
+            (size.width, size.height)
+        } else {
+            (canvas.offset_width() as f64, canvas.offset_height() as f64)
+        };
+        let physical_width = (offset_width * dpr) as u32;
+        let physical_height = (offset_height * dpr) as u32;
 
-        canvas.set_width(new_w as u32);
-        canvas.set_height(new_h as u32);
+        canvas.set_width(physical_width);
+        canvas.set_height(physical_height);
+
         let _ = context.scale(dpr, dpr);
 
         set_cursor(&canvas, &self.cursor);
@@ -378,7 +394,7 @@ impl WindowBuilder {
         let wh = window.clone();
         window
             .request_animation_frame(move || {
-                wh.handler.borrow_mut().size(new_w, new_h);
+                wh.handler.borrow_mut().size(physical_width, physical_height);
             })
             .expect("Failed to request animation frame");
 

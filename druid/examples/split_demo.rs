@@ -16,7 +16,7 @@
 
 use druid::piet::Color;
 use druid::widget::{Align, Container, Label, Padding, Split};
-use druid::{AppLauncher, LocalizedString, Widget, WindowDesc};
+use druid::{AppLauncher, LocalizedString, Widget, WindowDesc, PlatformError};
 
 fn build_app() -> impl Widget<u32> {
     let fixed_cols = Padding::new(
@@ -76,11 +76,18 @@ fn build_app() -> impl Widget<u32> {
     )
 }
 
-pub fn main() {
+#[cfg(not(target_arch = "wasm32"))]
+fn main() {
+    launch("").ok();
+}
+
+pub fn launch(canvas_id: &str) -> Result<(), PlatformError> {
     let window = WindowDesc::new(build_app)
-        .title(LocalizedString::new("split-demo-window-title").with_placeholder("Split Demo"));
+        .title(LocalizedString::new("split-demo-window-title").with_placeholder("Split Demo"))
+        .canvas_id(canvas_id);
     AppLauncher::with_window(window)
         .use_simple_logger()
         .launch(0u32)
         .expect("launch failed");
+    Ok(())
 }

@@ -15,7 +15,7 @@
 use druid::widget::{
     Flex, Label, MainAxisAlignment, Padding, Parse, Stepper, Switch, TextBox, WidgetExt,
 };
-use druid::{AppLauncher, Data, Lens, LensExt, LensWrap, LocalizedString, Widget, WindowDesc};
+use druid::{AppLauncher, Data, Lens, LensExt, LensWrap, LocalizedString, Widget, WindowDesc, PlatformError};
 
 #[derive(Clone, Data, Lens)]
 struct DemoState {
@@ -63,9 +63,15 @@ fn build_widget() -> impl Widget<DemoState> {
     col.center()
 }
 
-pub fn main() {
+#[cfg(not(target_arch = "wasm32"))]
+fn main() {
+    launch("").ok();
+}
+
+pub fn launch(canvas_id: &str) -> Result<(), PlatformError> {
     let window = WindowDesc::new(build_widget)
-        .title(LocalizedString::new("switch-demo-window-title").with_placeholder("Switch Demo"));
+        .title(LocalizedString::new("switches-demo-window-title").with_placeholder("Switches Demo"))
+        .canvas_id(canvas_id);
     AppLauncher::with_window(window)
         .use_simple_logger()
         .launch(DemoState {
@@ -73,4 +79,5 @@ pub fn main() {
             stepper_value: 1.0,
         })
         .expect("launch failed");
+    Ok(())
 }

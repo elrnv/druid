@@ -18,7 +18,7 @@ use std::time::Duration;
 
 use druid::widget::prelude::*;
 use druid::widget::BackgroundBrush;
-use druid::{AppLauncher, Color, LocalizedString, Point, Rect, TimerToken, WidgetPod, WindowDesc};
+use druid::{AppLauncher, Color, LocalizedString, Point, Rect, TimerToken, WidgetPod, WindowDesc, PlatformError};
 
 static TIMER_INTERVAL: Duration = Duration::from_millis(10);
 
@@ -116,17 +116,24 @@ impl Widget<u32> for SimpleBox {
     }
 }
 
-pub fn main() {
+#[cfg(not(target_arch = "wasm32"))]
+fn main() {
+    launch("").ok();
+}
+
+pub fn launch(canvas_id: &str) -> Result<(), PlatformError> {
     let window = WindowDesc::new(|| TimerWidget {
         timer_id: TimerToken::INVALID,
         simple_box: WidgetPod::new(SimpleBox),
         pos: Point::ZERO,
     })
     .with_min_size((200., 200.))
-    .title(LocalizedString::new("timer-demo-window-title").with_placeholder("Look at it go!"));
+    .title(LocalizedString::new("timer-demo-window-title").with_placeholder("Look at it go!"))
+    .canvas_id(canvas_id);
 
     AppLauncher::with_window(window)
         .use_simple_logger()
         .launch(0u32)
         .expect("launch failed");
+    Ok(())
 }

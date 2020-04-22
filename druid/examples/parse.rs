@@ -13,17 +13,23 @@
 // limitations under the License.
 
 use druid::widget::{Align, Flex, Label, Parse, TextBox};
-use druid::{AppLauncher, LocalizedString, Widget, WindowDesc};
+use druid::{AppLauncher, LocalizedString, Widget, WindowDesc, PlatformError};
 
-pub fn main() {
+#[cfg(not(target_arch = "wasm32"))]
+fn main() {
+    launch("").ok();
+}
+
+pub fn launch(canvas_id: &str) -> Result<(), PlatformError> {
     let main_window = WindowDesc::new(ui_builder).title(
         LocalizedString::new("parse-demo-window-title").with_placeholder("Number Parsing Demo"),
-    );
+    ).canvas_id(canvas_id);
     let data = Some(0);
     AppLauncher::with_window(main_window)
         .use_simple_logger()
         .launch(data)
         .expect("launch failed");
+    Ok(())
 }
 
 fn ui_builder() -> impl Widget<Option<u32>> {

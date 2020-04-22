@@ -15,7 +15,7 @@
 //! This example allows to play with scroll bars over different color tones.
 
 use druid::widget::{Container, Flex, Scroll, SizedBox};
-use druid::{AppLauncher, Color, LocalizedString, Widget, WindowDesc};
+use druid::{AppLauncher, Color, LocalizedString, Widget, WindowDesc, PlatformError};
 
 fn build_app() -> impl Widget<u32> {
     let mut col = Flex::column();
@@ -41,13 +41,19 @@ fn build_app() -> impl Widget<u32> {
     Scroll::new(col)
 }
 
-pub fn main() {
+#[cfg(not(target_arch = "wasm32"))]
+fn main() {
+    launch("").ok();
+}
+
+pub fn launch(canvas_id: &str) -> Result<(), PlatformError> {
     let main_window = WindowDesc::new(build_app).title(
         LocalizedString::new("scroll-colors-demo-window-title").with_placeholder("Rainbows!"),
-    );
+    ).canvas_id(canvas_id);
     let data = 0_u32;
     AppLauncher::with_window(main_window)
         .use_simple_logger()
         .launch(data)
         .expect("launch failed");
+    Ok(())
 }

@@ -14,11 +14,12 @@
 
 use druid::widget::Slider;
 use druid::widget::{CrossAxisAlignment, Flex, Label, TextBox};
-use druid::{AppLauncher, Data, Env, Lens, LocalizedString, Widget, WidgetExt, WindowDesc};
+use druid::{AppLauncher, Data, Env, Lens, LocalizedString, Widget, WidgetExt, WindowDesc, PlatformError};
 
-pub fn main() {
+pub fn launch(canvas_id: &str) -> Result<(), PlatformError> {
     let main_window = WindowDesc::new(ui_builder)
-        .title(LocalizedString::new("lens-demo-window-title").with_placeholder("Lens Demo"));
+        .title(LocalizedString::new("lens-demo-window-title").with_placeholder("Lens Demo"))
+        .canvas_id(canvas_id);
     let data = MyComplexState {
         term: "hello".into(),
         scale: 0.0,
@@ -27,6 +28,12 @@ pub fn main() {
     AppLauncher::with_window(main_window)
         .launch(data)
         .expect("launch failed");
+    Ok(())
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn main() {
+    launch("").ok();
 }
 
 #[derive(Clone, Debug, Data, Lens)]

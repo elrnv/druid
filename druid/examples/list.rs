@@ -20,6 +20,7 @@ use druid::lens::{self, LensExt};
 use druid::widget::{Button, CrossAxisAlignment, Flex, Label, List, Scroll};
 use druid::{
     AppLauncher, Color, Data, Lens, LocalizedString, UnitPoint, Widget, WidgetExt, WindowDesc,
+    PlatformError,
 };
 
 #[derive(Clone, Data, Lens)]
@@ -28,9 +29,10 @@ struct AppData {
     right: Arc<Vec<u32>>,
 }
 
-pub fn main() {
+pub fn launch(canvas_id: &str) -> Result<(), PlatformError> {
     let main_window = WindowDesc::new(ui_builder)
-        .title(LocalizedString::new("list-demo-window-title").with_placeholder("List Demo"));
+        .title(LocalizedString::new("list-demo-window-title").with_placeholder("List Demo"))
+        .canvas_id(canvas_id);
     // Set our initial data
     let data = AppData {
         left: Arc::new(vec![1, 2]),
@@ -40,6 +42,12 @@ pub fn main() {
         .use_simple_logger()
         .launch(data)
         .expect("launch failed");
+    Ok(())
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn main() {
+    launch("").ok();
 }
 
 fn ui_builder() -> impl Widget<AppData> {

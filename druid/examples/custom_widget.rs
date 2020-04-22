@@ -17,7 +17,7 @@
 use druid::kurbo::BezPath;
 use druid::piet::{FontBuilder, ImageFormat, InterpolationMode, Text, TextLayoutBuilder};
 use druid::widget::prelude::*;
-use druid::{Affine, AppLauncher, Color, LocalizedString, Point, Rect, WindowDesc};
+use druid::{Affine, AppLauncher, Color, LocalizedString, Point, Rect, WindowDesc, PlatformError};
 
 struct CustomWidget;
 
@@ -116,14 +116,20 @@ impl Widget<String> for CustomWidget {
     }
 }
 
-pub fn main() {
+pub fn launch(canvas_id: &str) -> Result<(), PlatformError> {
     let window = WindowDesc::new(|| CustomWidget {}).title(
         LocalizedString::new("custom-widget-demo-window-title").with_placeholder("Fancy Colors"),
-    );
+    ).canvas_id(canvas_id);
     AppLauncher::with_window(window)
         .use_simple_logger()
         .launch("Druid + Piet".to_string())
         .expect("launch failed");
+    Ok(())
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn main() {
+    launch("").ok();
 }
 
 fn make_image_data(width: usize, height: usize) -> Vec<u8> {

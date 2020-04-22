@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use druid::widget::{Align, Flex, Label, TextBox};
-use druid::{AppLauncher, Data, Env, Lens, LocalizedString, Widget, WidgetExt, WindowDesc};
+use druid::{AppLauncher, Data, Env, Lens, LocalizedString, Widget, WidgetExt, WindowDesc, PlatformError};
 
 const VERTICAL_WIDGET_SPACING: f64 = 20.0;
 const TEXT_BOX_WIDTH: f64 = 200.0;
@@ -24,11 +24,12 @@ struct HelloState {
     name: String,
 }
 
-pub fn main() {
+pub fn launch(canvas_id: &str) -> Result<(), PlatformError> {
     // describe the main window
     let main_window = WindowDesc::new(build_root_widget)
         .title(WINDOW_TITLE)
-        .window_size((400.0, 400.0));
+        .window_size((400.0, 400.0))
+        .canvas_id(canvas_id);
 
     // create the initial app state
     let initial_state = HelloState {
@@ -39,6 +40,12 @@ pub fn main() {
     AppLauncher::with_window(main_window)
         .launch(initial_state)
         .expect("Failed to launch application");
+    Ok(())
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn main() {
+    launch("").ok();
 }
 
 fn build_root_widget() -> impl Widget<HelloState> {
