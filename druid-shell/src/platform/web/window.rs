@@ -249,12 +249,12 @@ fn setup_keydown_callback(ws: &Rc<WindowState>) {
         let key = event.key();
         let text = key_to_text(key.as_str());
         let repeat = event.repeat();
-        if let KeyCode::Backspace = code {
-            // Prevent the browser from going back a page by default.
+        let druid_event = keyboard::KeyEvent::new(code, repeat, mods, text, text);
+        if state.handler.borrow_mut().key_down(druid_event) {
+            // Prevent the key event from affecting other parts of the browser/shell if it's
+            // already handled.
             event.prevent_default();
         }
-        let event = keyboard::KeyEvent::new(code, repeat, mods, text, text);
-        state.handler.borrow_mut().key_down(event);
     });
 }
 
@@ -358,7 +358,6 @@ impl WindowBuilder {
 
         let dpr = window.device_pixel_ratio();
         let (offset_width, offset_height) = if let Some(size) = self.size {
-            log::warn!("Size set explicitly: {:?}", &size);
             canvas.style().set_property("width", &format!("{}px", size.width))
                 .unwrap_or_else(|_| log::warn!("Failed to set canvas width"));
             canvas.style().set_property("height", &format!("{}px", size.height))
